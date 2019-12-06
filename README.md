@@ -11,7 +11,6 @@ From the list of the website, gets the numbers of
 - Releases
 - Contributors
 - Clones: Permission needed
-- Commiters: Permission needed
 - Visitors: Permision needed
 - Visitors(unique): Permision needed
 
@@ -59,10 +58,14 @@ From the list of the website, gets the numbers of
 
 4. Copy `url_list.csv.sample` and edit `url_list.csv`
 
+   > Warning: All urls in the csv must not end with /(slash).
+
 5. Execute `crawl.py`
 
-```bash
-python crawl.py
-# If you don't have permission to all repositories
-python crawl.py --no_permission
-```
+   ```bash
+   python crawl.py
+   # If you don't have permission to all repositories
+   python crawl.py --no_permission
+   # If you want to change timeout
+   python crawl.py --timeout=<SECONDS>
+   ```
