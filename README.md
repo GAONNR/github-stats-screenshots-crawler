@@ -48,7 +48,7 @@ From the list of the website, gets the numbers of
    pip install -r requirements.txt
    ```
 
-3. Edit `options.py`
+3. Copy `options.py.sample` and edit `options.py`
 
    ```python
    CREDENTIAL = {
@@ -57,7 +57,7 @@ From the list of the website, gets the numbers of
    }
    ```
 
-4. Edit `url_list.csv`
+4. Copy `url_list.csv.sample` and edit `url_list.csv`
 
 5. Execute `crawl.py`
 
