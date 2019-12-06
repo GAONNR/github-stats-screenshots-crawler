@@ -24,6 +24,12 @@ def get_number_from_page(driver, selector):
                        EC.presence_of_element_located(
                            (By.CSS_SELECTOR, selector)))
                    .get_attribute('innerText'))
+    except selenium.common.exceptions.TimeoutException:
+        return int(WebDriverWait(driver, ARGS.timeout * 2)
+                   .until(
+                       EC.presence_of_element_located(
+                           (By.CSS_SELECTOR, selector)))
+                   .get_attribute('innerText'))
     except ValueError:
         time.sleep(2)
         return int(WebDriverWait(driver, ARGS.timeout)
