@@ -5,3 +5,4 @@ venv/*
 *.csv
 options.py
 screenshots/*
+.DS_Store

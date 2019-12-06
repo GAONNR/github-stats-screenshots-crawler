@@ -18,6 +18,10 @@ From the list of the website, gets the numbers of
 
 1. Install Chromedriver
 
+   > I'm not sure this step correctly works.
+   > If the installation method below does not work well,
+   > I recommend you to google about installing chromedriver.
+
    The commands below is for version 79.0.  
    **Chrome must be installed**
 
