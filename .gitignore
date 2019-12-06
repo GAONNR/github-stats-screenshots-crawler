@@ -6,3 +6,5 @@ venv/*
 options.py
 screenshots/*
 .DS_Store
+pdfs/*.pdf
+pdfs/*.tex
