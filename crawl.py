@@ -4,20 +4,33 @@ import selenium
 import pandas as pd
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from options import CREDENTIAL
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--no_permission', action='store_true')
-parser.add_argument('--timeout', type=int, default=4)
+parser.add_argument('--timeout', type=int, default=10)
 ARGS = parser.parse_args()
 
-MUST_VISITS = [
-    '%s',
-    '%s/issues',
-    '%s/issues?q=is%3Aissue+is%3Aclosed',
-    '%s/graphs/traffic'
-]
+
+def get_number_from_page(driver, selector):
+    try:
+        return int(WebDriverWait(driver, ARGS.timeout)
+                   .until(
+                       EC.presence_of_element_located(
+                           (By.CSS_SELECTOR, selector)))
+                   .get_attribute('innerText'))
+    except ValueError:
+        time.sleep(2)
+        return int(WebDriverWait(driver, ARGS.timeout)
+                   .until(
+                       EC.presence_of_element_located(
+                           (By.CSS_SELECTOR, selector)))
+                   .get_attribute('innerText'))
 
 
 class Stat:
@@ -37,61 +50,64 @@ class Stat:
     def __update_from_main(self, driver, url):
         print('Getting stats from main...')
         driver.get(url)
-        time.sleep(ARGS.timeout)
 
-        self.watches = int(driver.find_element_by_css_selector(
-            'ul.pagehead-actions li:nth-child(1) a.social-count').get_attribute('innerHTML'))
-        self.stars = int(driver.find_element_by_css_selector(
-            'ul.pagehead-actions li:nth-child(2) a.social-count').get_attribute('innerHTML'))
-        self.forks = int(driver.find_element_by_css_selector(
-            'ul.pagehead-actions li:nth-child(3) a.social-count').get_attribute('innerHTML'))
-        self.commits = int(driver.find_element_by_css_selector(
-            'ul.numbers-summary li:nth-child(1) span.num').text)
-        self.branches = int(driver.find_element_by_css_selector(
-            'ul.numbers-summary li:nth-child(2) span.num').text)
-        self.releases = int(driver.find_element_by_css_selector(
-            'ul.numbers-summary li:nth-child(4) span.num').text)
+        self.watches = get_number_from_page(
+            driver, 'ul.pagehead-actions li:nth-child(1) a.social-count')
+        self.stars = get_number_from_page(
+            driver, 'ul.pagehead-actions li:nth-child(2) a.social-count')
+        self.forks = get_number_from_page(
+            driver, 'ul.pagehead-actions li:nth-child(3) a.social-count')
+        self.commits = get_number_from_page(
+            driver, 'ul.numbers-summary li:nth-child(1) span.num')
+        self.branches = get_number_from_page(
+            driver, 'ul.numbers-summary li:nth-child(2) span.num')
+        self.releases = get_number_from_page(
+            driver, 'ul.numbers-summary li:nth-child(4) span.num')
         if len(driver.find_elements_by_css_selector('ul.numbers-summary li')) < 7:
-            self.contributors = int(driver.find_element_by_css_selector(
-                'ul.numbers-summary li:nth-child(5) span.num').text)
+            self.contributors = get_number_from_page(
+                driver, 'ul.numbers-summary li:nth-child(5) span.num')
         else:
-            self.contributors = int(driver.find_element_by_css_selector(
-                'ul.numbers-summary li:nth-child(6) span.num').text)
+            self.contributors = get_number_from_page(
+                driver, 'ul.numbers-summary li:nth-child(6) span.num')
 
     def __update_from_issues(self, driver, url):
         print('Getting stats from issues...')
         driver.get(url)
-        time.sleep(ARGS.timeout)
+
         try:
-            open_issues = int(driver.find_element_by_css_selector(
-                '#js-issues-toolbar div.table-list-header a:nth-child(1)').text.strip().split('Open')[0])
-            closed_issues = int(driver.find_element_by_css_selector(
-                '#js-issues-toolbar div.table-list-header a:nth-child(1)').text.strip().split('Closed')[0])
+            open_issues = int(WebDriverWait(driver, ARGS.timeout)
+                              .until(
+                                  EC.presence_of_element_located(
+                                      (By.CSS_SELECTOR,
+                                       '#js-issues-toolbar div.table-list-header a:nth-child(1)')))
+                              .get_attribute('innerText').strip().split('Open')[0])
+            closed_issues = int(WebDriverWait(driver, ARGS.timeout)
+                                .until(
+                                    EC.presence_of_element_located(
+                                        (By.CSS_SELECTOR,
+                                         '#js-issues-toolbar div.table-list-header a:nth-child(1)')))
+                                .get_attribute('innerText').strip().split('Closed')[0])
             self.issues = open_issues + closed_issues
-        except selenium.common.exceptions.NoSuchElementException:
+        except selenium.common.exceptions.TimeoutException:
             self.issues = 0
 
     def __update_from_traffic(self, driver, url):
         print('Getting stats from traffic...')
         driver.get(url)
-        time.sleep(ARGS.timeout)
 
         try:
-            self.clones = int(
-                driver.find_element_by_css_selector(
-                    '#js-clones-graph span.clones').text)
+            self.clones = get_number_from_page(
+                driver, '#js-clones-graph span.clones')
         except ValueError:
             self.clones = 0
         try:
-            self.visitors = int(
-                driver.find_element_by_css_selector(
-                    '#js-visitors-graph span.visits').text)
+            self.visitors = get_number_from_page(
+                driver, '#js-visitors-graph span.visits')
         except ValueError:
             self.visitors = 0
         try:
-            self.visitors_unique = int(
-                driver.find_element_by_css_selector(
-                    '#js-visitors-graph span.uniques').text)
+            self.visitors_unique = get_number_from_page(
+                driver, '#js-visitors-graph span.uniques')
         except ValueError:
             self.visitors_unique = 0
 
@@ -114,18 +130,18 @@ class Stat:
         get_fullpage_shot(driver, '%s_traffic.png' % fname_base)
 
 
-def prepare_for_github_credentials():
+def prepare_for_github_credentials(timeout):
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--start-maximized')
     driver = webdriver.Chrome(chrome_options=chrome_options)
+    driver.implicitly_wait(timeout)
 
     print('Github login processing...')
     driver.get('https://github.com/login')
     driver.find_element_by_id('login_field').send_keys(CREDENTIAL['id'])
     driver.find_element_by_id('password').send_keys(CREDENTIAL['pw'])
     driver.find_element_by_name('commit').click()
-    time.sleep(ARGS.timeout)
     print('Done.')
 
     return driver
@@ -135,7 +151,6 @@ def get_fullpage_shot(driver, fname):
     body = driver.find_element_by_tag_name('body')
     window_height = body.size['height']
     driver.set_window_size(1920, window_height)  # the trick
-    time.sleep(ARGS.timeout)
 
     driver.save_screenshot('screenshots/%s' % fname)
 
@@ -154,7 +169,7 @@ def get_repo_stat(driver, url, no_perm):
 
 
 def __main():
-    driver = prepare_for_github_credentials()
+    driver = prepare_for_github_credentials(ARGS.timeout)
 
     df = pd.read_csv('url_list.csv')
     res = [get_repo_stat(driver, url, ARGS.no_permission)
