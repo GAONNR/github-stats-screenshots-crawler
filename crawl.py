@@ -25,7 +25,7 @@ def get_number_from_page(driver, selector):
                            (By.CSS_SELECTOR, selector)))
                    .get_attribute('innerText'))
     except selenium.common.exceptions.TimeoutException:
-        return int(WebDriverWait(driver, ARGS.timeout * 2)
+        return int(WebDriverWait(driver, ARGS.timeout * 12)
                    .until(
                        EC.presence_of_element_located(
                            (By.CSS_SELECTOR, selector)))
