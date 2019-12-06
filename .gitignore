@@ -2,3 +2,6 @@ venv/*
 .vscode/*
 *.png
 *.pyc
+*.csv
+options.py
+screenshots/*
