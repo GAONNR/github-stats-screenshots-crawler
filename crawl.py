@@ -85,13 +85,13 @@ class Stat:
                               .until(
                                   EC.presence_of_element_located(
                                       (By.CSS_SELECTOR,
-                                       '#js-issues-toolbar div.table-list-header a:nth-child(1)')))
+                                       '#js-issues-toolbar .table-list-header-toggle a:nth-child(1)')))
                               .get_attribute('innerText').strip().split('Open')[0])
             closed_issues = int(WebDriverWait(driver, ARGS.timeout)
                                 .until(
                                     EC.presence_of_element_located(
                                         (By.CSS_SELECTOR,
-                                         '#js-issues-toolbar div.table-list-header a:nth-child(1)')))
+                                         '#js-issues-toolbar .table-list-header-toggle a:nth-child(2)')))
                                 .get_attribute('innerText').strip().split('Closed')[0])
             self.issues = open_issues + closed_issues
         except selenium.common.exceptions.TimeoutException:
