@@ -64,17 +64,17 @@ class Stat:
         self.forks = get_number_from_page(
             driver, 'ul.pagehead-actions li:nth-child(3) a.social-count')
         self.commits = get_number_from_page(
-            driver, 'ul.numbers-summary li:nth-child(1) span.num')
+            driver, '.js-details-container.Details ul.list-style-none span strong')
         self.branches = get_number_from_page(
-            driver, 'ul.numbers-summary li:nth-child(2) span.num')
-        self.releases = get_number_from_page(
-            driver, 'ul.numbers-summary li:nth-child(4) span.num')
-        if len(driver.find_elements_by_css_selector('ul.numbers-summary li')) < 7:
-            self.contributors = get_number_from_page(
-                driver, 'ul.numbers-summary li:nth-child(5) span.num')
+            driver, '.file-navigation .flex-self-center a:nth-child(1) strong')
+        if len(driver.find_elements_by_css_selector('.BorderGrid .BorderGrid-row:nth-child(2) h2.h4 span.Counter')) > 0:
+            self.releases = get_number_from_page(
+                driver, '.BorderGrid .BorderGrid-row:nth-child(2) h2.h4 span.Counter')
+        if len(driver.find_elements_by_css_selector('.BorderGrid .BorderGrid-row')) < 6:
+            self.contributors = 1
         else:
             self.contributors = get_number_from_page(
-                driver, 'ul.numbers-summary li:nth-child(6) span.num')
+                driver, '.BorderGrid .BorderGrid-row:nth-child(5) h2.h4 span.Counter')
 
     def __update_from_issues(self, driver, url):
         print('Getting stats from issues...')
@@ -138,7 +138,7 @@ class Stat:
 
 def prepare_for_github_credentials(timeout):
     chrome_options = Options()
-    chrome_options.add_argument('--headless')
+    # chrome_options.add_argument('--headless')
     chrome_options.add_argument('--start-maximized')
     driver = webdriver.Chrome(chrome_options=chrome_options)
     driver.implicitly_wait(timeout)
@@ -178,7 +178,7 @@ def __main():
     driver = prepare_for_github_credentials(ARGS.timeout)
 
     df = pd.read_csv('url_list.csv')
-    res = [get_repo_stat(driver, url, ARGS.no_permission)
+    res = [get_repo_stat(driver, url.strip(), ARGS.no_permission)
            for url in df['URL']]
     driver.quit()
 
