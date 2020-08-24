@@ -70,11 +70,11 @@ class Stat:
         if len(driver.find_elements_by_css_selector('.BorderGrid .BorderGrid-row:nth-child(2) h2.h4 span.Counter')) > 0:
             self.releases = get_number_from_page(
                 driver, '.BorderGrid .BorderGrid-row:nth-child(2) h2.h4 span.Counter')
-        if len(driver.find_elements_by_css_selector('.BorderGrid .BorderGrid-row')) < 6:
+        if len(driver.find_elements_by_css_selector('.BorderGrid .BorderGrid-row')) < 5:
             self.contributors = 1
         else:
             self.contributors = get_number_from_page(
-                driver, '.BorderGrid .BorderGrid-row:nth-child(5) h2.h4 span.Counter')
+                driver, '.BorderGrid .BorderGrid-row:nth-last-child(2) h2.h4 span.Counter')
 
     def __update_from_issues(self, driver, url):
         print('Getting stats from issues...')
@@ -138,7 +138,7 @@ class Stat:
 
 def prepare_for_github_credentials(timeout):
     chrome_options = Options()
-    # chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--headless')
     chrome_options.add_argument('--start-maximized')
     driver = webdriver.Chrome(chrome_options=chrome_options)
     driver.implicitly_wait(timeout)
