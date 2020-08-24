@@ -1,15 +1,16 @@
-import time
 import argparse
-import selenium
+import time
+
 import pandas as pd
-
+import selenium
 from selenium import webdriver
-from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from options import CREDENTIAL
+from selenium.webdriver.support.ui import WebDriverWait
 
+from options import CREDENTIAL
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--no_permission', action='store_true')
@@ -24,12 +25,15 @@ def get_number_from_page(driver, selector):
                        EC.presence_of_element_located(
                            (By.CSS_SELECTOR, selector)))
                    .get_attribute('innerText'))
-    except selenium.common.exceptions.TimeoutException:
-        return int(WebDriverWait(driver, ARGS.timeout * 12)
-                   .until(
-                       EC.presence_of_element_located(
-                           (By.CSS_SELECTOR, selector)))
-                   .get_attribute('innerText'))
+    except TimeoutException:
+        try:
+            return int(WebDriverWait(driver, ARGS.timeout * 12)
+                    .until(
+                        EC.presence_of_element_located(
+                            (By.CSS_SELECTOR, selector)))
+                    .get_attribute('innerText'))
+        except TimeoutException:
+            return 1
     except ValueError:
         time.sleep(2)
         return int(WebDriverWait(driver, ARGS.timeout)
