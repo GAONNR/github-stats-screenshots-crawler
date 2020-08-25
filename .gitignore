@@ -8,3 +8,4 @@ screenshots/*
 .DS_Store
 pdfs/*.pdf
 pdfs/*.tex
+repos/*
